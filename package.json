@@ -1,0 +1,33 @@
+{
+  "name": "sv_node_share",
+  "version": "0.1.0",
+  "description": "An share library for node.js.",
+  "main": "index.js",
+  "scripts": {
+    "test": "./node_modules/.bin/_mocha --ui bdd --recursive ./test --require=env-test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NothingYF/sv_node_share.git"
+  },
+  "keywords": [
+    "sv_node_share"
+  ],
+  "author": "NothingYF",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/NothingYF/sv_node_share/issues"
+  },
+  "dependencies": {
+    "fs-extra": "^3.0.1",
+    "ioredis": "^3.1.1",
+    "log4js": "^1.1.1",
+    "moment": "^2.18.1",
+    "request": "^2.81.0"
+  },
+  "devDependencies": {
+    "env-test": "^1.0.0",
+    "mocha": "^3.4.2",
+    "should": "^11.2.1"
+  }
+}
