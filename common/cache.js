@@ -1,5 +1,6 @@
 const redis_client = require('./redis');
 const logger = require('./logger')('cache');
+const debug = require('debug')('cache');
 
 var redis = null;
 
@@ -35,7 +36,7 @@ const get = (key) => {
             }
             data = JSON.parse(data);
             let duration = (new Date() - t);
-            logger.debug('cache', 'get', key, duration + 'ms');
+            debug('cache', 'get', key, duration + 'ms');
             resolve(data);
         });
     });
@@ -105,7 +106,7 @@ const del = (key) => {
             }
             
             let duration = (new Date() - t);
-            logger.debug('cache', 'del', key, duration + 'ms');
+            debug('cache', 'del', key, duration + 'ms');
             resolve(data);
         });
     });
@@ -128,7 +129,7 @@ const keys = function(key) {
             }
             
             let duration = (new Date() - t);
-            logger.debug('cache', 'get', key, duration + 'ms');
+            debug('cache', 'get', key, duration + 'ms');
             resolve(data);
         });
     });

@@ -1,6 +1,6 @@
 {
   "name": "sv_node_share",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "An share library for node.js.",
   "main": "index.js",
   "scripts": {
@@ -19,6 +19,7 @@
     "url": "https://github.com/NothingYF/sv_node_share/issues"
   },
   "dependencies": {
+    "debug": "^2.6.8",
     "fs-extra": "^3.0.1",
     "ioredis": "^3.1.1",
     "log4js": "^1.1.1",
