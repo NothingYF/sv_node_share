@@ -10,6 +10,7 @@ const tools = require('../index').tools;
 
 //logger.debug('123');
 (async () => {
+    
     await cache.init('127.0.0.1', 6379);
     await cache.set('1', 'hello');
     logger.debug('cache 1 = ', await cache.get('1'));
@@ -20,6 +21,10 @@ const tools = require('../index').tools;
     logger.debug(tools.formatTime({exp: 'YYYY-MM-DD'}));
     logger.debug(tools.sysinfo());
     logger.debug(await tools.exec('netstat -an'));
+    
+
+    let v = await request.call('http://127.0.0.1:2379/v2/keys/testjson');
+    logger.debug(v.body.node.value);
 })();
 
 

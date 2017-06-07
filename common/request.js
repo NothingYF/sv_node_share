@@ -5,34 +5,39 @@
 
 const request = require('request');
 const tools = require('./tools');
-const logger = require('./logger');
+const logger = require('./logger')('request');
 
 /**
  * HTTP请求
  * @param url
  * @returns {Promise}
  */
-const call = function (url) {
-    return new Promise((resolve, reject) => {
-        request(url, (error, response, body) => {
+var call = function (url) {
+    return new Promise(function (resolve, reject) {
+        request(url, function (error, response, body) {
             if (!error) {
+                let content_type =  response.headers['content-type'];
+
                 if (response.headers['content-encoding'] && response.headers['content-encoding'] == 'gzip') {
                     zlib.unzip(body, function (err, buffer) {
                         if (err) {
                             reject(err);
                         }
                         body = buffer.toString();
-                        resolve({code: response.statusCode, message: body});
+                        resolve({response: response, body: body});
                     });
-                } else {
-                    resolve({code: response.statusCode, message: body});
+                } else if(content_type.indexOf('json') != -1){
+                    resolve({response: response, body: JSON.parse(body)});
+                }
+                else{
+                    resolve({response: response, body: body});
                 }
             } else {
                 reject(error);
             }
         })
     });
-};
+}
 
 exports.call = call;
 
@@ -60,6 +65,7 @@ const jsoncall = async function (url, body, headers = null) {
 };
 
 exports.jsoncall = jsoncall;
+
 
 /**
  * 获取base64数据
