@@ -6,6 +6,8 @@
 const request = require('request');
 const tools = require('./tools');
 const logger = require('./logger')('request');
+const streamBase64 = require('base64-stream');
+const streamConcat = require('concat-stream');
 
 /**
  * HTTP请求
@@ -41,6 +43,13 @@ var call = function (url) {
 
 exports.call = call;
 
+/***
+ * JSON请求
+ * @param url 
+ * @param body 
+ * @param headers
+ * @returns {*}
+ */
 const jsoncall = async function (url, body, headers = null) {
 
     try{
