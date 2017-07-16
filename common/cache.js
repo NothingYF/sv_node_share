@@ -36,7 +36,7 @@ const get = (key) => {
             }
             data = JSON.parse(data);
             let duration = (new Date() - t);
-            debug('cache', 'get', key, duration + 'ms');
+            logger.info('cache', 'get', key, duration + 'ms');
             resolve(data);
         });
     });
@@ -46,14 +46,14 @@ const get = (key) => {
  * 设置缓存数据
  * @param key 关键字
  * @param value 对象值
- * @param time 失效时间，秒为单位
+ * @param time 失效时间，秒为单位(默认为1天)）
  * @returns {Promise}
  */
-const set = (key, value, time) => {
+const set = (key, value, time = 86400) => {
     return new Promise(function (resolve, reject) {
         value = JSON.stringify(value);
         // 设置默认过期时间
-        
+
         if (!time) {
             redis.set(key, value, function (err) {
                 if(err){
@@ -106,7 +106,7 @@ const del = (key) => {
             }
             
             let duration = (new Date() - t);
-            debug('cache', 'del', key, duration + 'ms');
+            logger.info('cache', 'del', key, duration + 'ms');
             resolve(data);
         });
     });
@@ -129,7 +129,7 @@ const keys = function(key) {
             }
             
             let duration = (new Date() - t);
-            debug('cache', 'get', key, duration + 'ms');
+            logger.info('cache', 'get', key, duration + 'ms');
             resolve(data);
         });
     });
