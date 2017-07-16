@@ -23,7 +23,7 @@ var call = function (url) {
                 if (response.headers['content-encoding'] && response.headers['content-encoding'] == 'gzip') {
                     zlib.unzip(body, function (err, buffer) {
                         if (err) {
-                            reject(err);
+                            return reject(err);
                         }
                         body = buffer.toString();
                         resolve({response: response, body: body});
@@ -39,7 +39,7 @@ var call = function (url) {
             }
         })
     });
-}
+};
 
 exports.call = call;
 

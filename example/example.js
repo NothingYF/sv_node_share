@@ -8,6 +8,10 @@ const cache = require('../index').cache;
 const request = require('../index').request;
 const tools = require('../index').tools;
 
+process.on('unhandledRejection', (reason, p) => {
+    logger.error("Unhandled Rejection at: Promise ", p, " reason: ", reason);
+});
+
 //logger.debug('123');
 (async () => {
     
