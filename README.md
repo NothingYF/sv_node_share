@@ -1,7 +1,7 @@
 # sv_node_share
 sv node share
 
-[![build status](https://git.scsv.online/node-public/sv_node_share/badges/master/build.svg)](https://git.scsv.online/node-public/sv_node_share/commits/master)
+[![build status](https://git.scsv.online/node-public/sv_node_share/badges/master/build.svg)](https://git.scsv.online/node-public/sv_node_share/pipelines)
 
 ## 安装
 
