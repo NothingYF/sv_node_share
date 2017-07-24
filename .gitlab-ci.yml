@@ -26,14 +26,14 @@ before_script:
   - npm install
 
 test_service:
-stage: test
-script:
-  - npm test
+  stage: test
+  script:
+    - npm test
 
 deploy:
-stage: deploy
-script:
-  - echo 'deploy success'
+  stage: deploy
+  script:
+    - echo 'deploy success'
 only: 
-  - master
+    - master
 
