@@ -29,11 +29,13 @@ test_service:
   stage: test
   script:
     - npm test
+  only:
+    - master
 
 deploy:
   stage: deploy
   script:
     - echo 'deploy success'
-only: 
+  only:
     - master
 
