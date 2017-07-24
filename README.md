@@ -1,6 +1,8 @@
 # sv_node_share
 sv node share
 
+[![build status](https://git.scsv.online/node-public/sv_node_share/badges/master/build.svg)](https://git.scsv.online/node-public/sv_node_share/commits/master)
+
 ## 安装
 
 需要node v7.6.0以上版本支持
