@@ -170,3 +170,29 @@ String.prototype.trim = function (char, type = 'right') {
     }
     return this.replace(/^\s+|\s+$/g, '');
 };
+
+/**
+ * 替换字符串（非正则表达式实现）
+ * @param from  需替换的字符串
+ * @param to 替换后字符串
+ * @returns {string} 替换后字符串
+ */
+String.prototype.replaceAll = function (from, to) {
+    let i = 0;
+    let j = 0;
+    let s = '';
+    while(true){
+        i = this.indexOf(from, j);
+        if(i == -1){
+            s += this.substr(j);
+            break;
+        }
+        s += this.substr(j, i - j);
+        s += to;
+        i += from.length;
+        if(i >= this.length)
+            break;
+        j = i;
+    }
+    return s;
+}

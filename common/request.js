@@ -19,7 +19,6 @@ var call = function (url) {
         request(url, function (error, response, body) {
             if (!error) {
                 let content_type =  response.headers['content-type'];
-
                 if (response.headers['content-encoding'] && response.headers['content-encoding'] == 'gzip') {
                     zlib.unzip(body, function (err, buffer) {
                         if (err) {
@@ -28,7 +27,7 @@ var call = function (url) {
                         body = buffer.toString();
                         resolve({response: response, body: body});
                     });
-                } else if(content_type.indexOf('json') != -1){
+                } else if(content_type && content_type.indexOf('json') != -1){
                     resolve({response: response, body: JSON.parse(body)});
                 }
                 else{

@@ -14,7 +14,9 @@ process.on('unhandledRejection', (reason, p) => {
 
 //logger.debug('123');
 (async () => {
-    
+
+    logger.debug('123');
+
     await cache.init('127.0.0.1', 6379);
     await cache.set('1', 'hello');
     logger.debug('cache 1 = ', await cache.get('1'));
@@ -29,6 +31,15 @@ process.on('unhandledRejection', (reason, p) => {
 
     let v = await request.call('http://127.0.0.1:2379/v2/keys/testjson');
     logger.debug(v.body.node.value);
+
+
+    v = await request.call({
+        url : 'https://127.0.0.1:8989',
+        rejectUnauthorized : false
+    }
+    );
+
+    logger.debug(v.body);
 })();
 
 
