@@ -6,7 +6,7 @@ const debug = require('debug')('etcd');
 const urlencode = require('urlencode');
 const request = require('./request');
 
-var etcd_url = 'http://127.0.0.1:2379/v2/keys/';
+var etcd_url = 'http://127.0.0.1:2379/v2/keys';
 
 /**
  * 获取键值
