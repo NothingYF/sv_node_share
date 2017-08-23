@@ -22,10 +22,16 @@ exports.get = async(key, json = true)=>{
     debug(ret.body);
 
     if(ret.body.errorCode)
-        return null;
+        return ret;
 
-    if(json && ret.body && ret.body.node){
-        return JSON.parse(ret.body.node.value);
+    if(ret.body && ret.body.node){
+
+        let node = ret.body.node;
+        if(node.dir){
+            return node.nodes;
+        }
+
+        return json ? JSON.parse(node.value) : node.value;
     }
 
     return ret;

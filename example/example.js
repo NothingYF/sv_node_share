@@ -7,6 +7,7 @@ const logger = require('../index').logger('example');
 const cache = require('../index').cache;
 const request = require('../index').request;
 const tools = require('../index').tools;
+const etcd = require('../index').etcd;
 
 process.on('unhandledRejection', (reason, p) => {
     logger.error("Unhandled Rejection at: Promise ", p, " reason: ", reason);
@@ -14,6 +15,13 @@ process.on('unhandledRejection', (reason, p) => {
 
 //logger.debug('123');
 (async () => {
+
+    let body = await etcd.get('/status/ms/');
+    logger.debug(body);
+
+    for(let o of body){
+        logger.debug(JSON.parse(o.value));
+    }
 
     logger.debug('123');
 
@@ -40,6 +48,7 @@ process.on('unhandledRejection', (reason, p) => {
     );
 
     logger.debug(v.body);
+
 })();
 
 
