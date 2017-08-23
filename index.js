@@ -7,9 +7,11 @@ const logger = require('./common/logger');
 const request = require('./common/request');
 const tools = require('./common/tools');
 const validate = require('./common/validate');
+const rmq = require('./common/rmq');
 
 exports.cache = cache;
 exports.logger = logger;
 exports.request = request;
 exports.tools = tools;
 exports.validate = validate;
+exports.rmq = rmq;
