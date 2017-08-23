@@ -203,7 +203,7 @@ String.prototype.replaceAll = function (from, to) {
  * @param  {String}  addr2 地址二
  * @param  {String}  mask  子网掩码
  */
-exposts.isSameNetSeg = (addr1, addr2, mask) => {
+exports.isSameNetSeg = (addr1, addr2, mask) => {
     if(!addr1 || !addr2 || !mask){
         return false;
     }
