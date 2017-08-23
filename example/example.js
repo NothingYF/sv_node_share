@@ -53,6 +53,9 @@ const testRmq = async (url)=> {
     //     producer.close();
     //     // consumer.close();
     // }, 5000);
+
+    // testRmq("amqp://guest:guest@192.168.1.173:9672?heartbeat=60");
+
 }
 
 (async () => {
@@ -83,7 +86,6 @@ const testRmq = async (url)=> {
 
     logger.debug(v.body);
 
-    // testRmq("amqp://guest:guest@192.168.1.173:9672?heartbeat=60");
 })();
 
 
