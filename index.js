@@ -14,5 +14,5 @@ exports.logger = logger;
 exports.request = request;
 exports.tools = tools;
 exports.validate = validate;
-const etcd = etcd;
+exports.etcd = etcd;
 exports.rmq = rmq;
