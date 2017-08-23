@@ -4,7 +4,7 @@
 const mq = require('amqplib');
 const util = require('util');
 const EventEmitter = require('events').EventEmitter;
-const logger = require('./logger')('rmq');
+const debug = require('debug')('rmq');
 
 /**
  * rmq消息实例
@@ -85,7 +85,7 @@ function rmq(type = 1, exchange = 'server', mode = 'direct') {
                     this.consume(item);
                 }
             } catch (e) {
-                logger.error('exception: ', e);
+                debug('exception: ', e);
             }
 
         }, time);
@@ -103,14 +103,14 @@ function rmq(type = 1, exchange = 'server', mode = 'direct') {
         // 监听异常事件
         this.client.on('close', () => {
             this.flag = false;
-            logger.error('mq connect close');
+            debug('mq connect close');
 
             // 重连操作
             recon();
         });
 
         this.client.on('error', (err) => {
-            logger.error('Error in mq connection: ' + err);
+            debug('Error in mq connection: ' + err);
         });
 
         // 创建通道
@@ -121,7 +121,7 @@ function rmq(type = 1, exchange = 'server', mode = 'direct') {
             await this.channel.assertExchange(this.config.exchange, this.config.mode, {confirm: false});
         }
 
-        logger.info('mq connected');
+        debug('mq connected');
     }
 
     /**
@@ -181,7 +181,7 @@ function rmq(type = 1, exchange = 'server', mode = 'direct') {
      */
     rmq.prototype.send = (data, type) => {
         if (!this.flag) {
-            logger.debug('wait connect');
+            debug('wait connect');
             return;
         }
 

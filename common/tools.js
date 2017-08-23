@@ -196,3 +196,32 @@ String.prototype.replaceAll = function (from, to) {
     }
     return s;
 }
+
+/**
+ * 判断两个IP地址是否在同一个网段
+ * @param  {String}  addr1 地址一
+ * @param  {String}  addr2 地址二
+ * @param  {String}  mask  子网掩码
+ */
+exposts.isSameNetSeg = (addr1, addr2, mask) => {
+    if(!addr1 || !addr2 || !mask){
+        return false;
+    }
+
+    addr1 = addr1.split(".");
+    addr2 = addr2.split(".");
+    mask  = mask.split(".");
+
+    // 格式错误
+    if (addr1.length() != addr2.length() != mask.length() != 4) {
+        return false;
+    }
+
+    for(let i = 0; i < 4; ++i){
+        if (parseInt(addr1[i]) & parseInt(mask[i]) != parseInt(addr2[i]) & parseInt(mask[i])) {
+            return false;
+        }
+    }
+
+    return true;
+}
