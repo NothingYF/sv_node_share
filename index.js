@@ -7,8 +7,8 @@ const logger = require('./common/logger');
 const request = require('./common/request');
 const tools = require('./common/tools');
 const validate = require('./common/validate');
+const etcd = require('./common/etcd');
 const rmq = require('./common/rmq');
-
 exports.cache = cache;
 exports.logger = logger;
 exports.request = request;
