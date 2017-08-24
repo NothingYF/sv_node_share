@@ -14,27 +14,19 @@ var etcd_url = 'http://127.0.0.1:2379/v2/keys';
  * @param json
  * @returns {*}
  */
-exports.get = async(key, json = true)=>{
+exports.get = async(key, recursive = true)=>{
 
     let url = etcd_url + key;
 
+    if(recursive)
+        url += '?recursive=true';
+
     let ret = await request.call(url);
-    debug(ret.body);
 
-    if(ret.body.errorCode)
-        return ret;
+    if(ret)
+        debug(ret.body);
 
-    if(ret.body && ret.body.node){
-
-        let node = ret.body.node;
-        if(node.dir){
-            return node.nodes;
-        }
-
-        return json ? JSON.parse(node.value) : node.value;
-    }
-
-    return ret;
+    return ret.body;
 }
 
 /**
