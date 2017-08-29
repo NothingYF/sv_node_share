@@ -96,6 +96,8 @@ function rmq(type = 1, exchange = 'server', mode = 'direct') {
      * @param {String} 服务器连接地址
      */
     rmq.prototype.connect = async (url) => {
+        debug('connect to', url);
+
         this.url = url;
         this.client = await mq.connect(this.url);
         this.flag = true;
@@ -121,7 +123,7 @@ function rmq(type = 1, exchange = 'server', mode = 'direct') {
             await this.channel.assertExchange(this.config.exchange, this.config.mode, {confirm: false});
         }
 
-        debug('mq connected');
+        debug(url, 'connected');
     }
 
     /**
@@ -176,16 +178,18 @@ function rmq(type = 1, exchange = 'server', mode = 'direct') {
 
     /**
      * 消息投递
-     * @param {Object} data 消息内容
-     * @param {String} type 路由关键字
+     * @param {Object} data   消息内容
+     * @param {String} type   路由关键字
+     * @param {String} expire 消息过期时间
      */
-    rmq.prototype.send = (data, type) => {
+    rmq.prototype.send = (data, type, expire = 120000) => {
         if (!this.flag) {
             debug('wait connect');
             return;
         }
 
-        this.channel.publish(this.config.exchange, type, new Buffer(JSON.stringify(data)), {expiration: 120000});
+        debug(this.url, data, type);
+        this.channel.publish(this.config.exchange, type, new Buffer(JSON.stringify(data)), {expiration: expire});
     }
 }
 
