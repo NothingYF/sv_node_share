@@ -1,6 +1,6 @@
 {
   "name": "sv_node_share",
-  "version": "1.0.16",
+  "version": "1.0.18",
   "description": "An share library for node.js.",
   "main": "index.js",
   "scripts": {

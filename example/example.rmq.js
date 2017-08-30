@@ -8,8 +8,7 @@ const testRmq = async (url, exchange)=> {
     await consumer.connect(url);
 
     // 消息订阅
-    await consumer.consume('consumer1');
-    await consumer.consume('consumer2');
+    await consumer.consume('consumer');
 
     // 接收消息
     consumer.on('msg', (exchange, route, msg) => {
@@ -23,14 +22,12 @@ const testRmq = async (url, exchange)=> {
     await producer.connect(url);
 
     // 绑定路由字
-    producer.routeKey('consumer1', 'key1');
-    // producer.routeKey('consumer2', 'key2');
+    producer.routeKey('consumer', 'key');
 
     // 发送消息
     setInterval(() => {
-        producer.send({exchange: exchange, time: tools.formatTime()}, 'key1');
-        // producer.send({exchange: exchange, time: tools.formatTime()}, 'key2');
-    }, 10000);
+        producer.send({exchange: exchange, time: tools.formatTime()}, 'key');
+    }, 5000);
 
     // 关闭mq
     // setTimeout(() => {
@@ -39,6 +36,16 @@ const testRmq = async (url, exchange)=> {
     //     consumer.close();
     // }, 5000);
 }
+
+process.on('uncaughtException', (err) => {
+    // handle the error safely
+    logger.error('error', err);
+});
+
+process.on('unhandledRejection', (reason, p) => {
+    //logger.error("Unhandled Rejection at: Promise ", p, " reason: ", reason);
+    logger.error('error', `Unhandled Rejection at: Promise ${p}, reason: ${reason}`);
+});
 
 (async () => {
     await testRmq("amqp://guest:guest@192.168.1.173:8672?heartbeat=60", '8672');

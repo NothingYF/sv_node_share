@@ -13,89 +13,43 @@ const debug = require('debug')('rmq');
  * @param mode
  * @returns {rmq}
  */
-function rmq(type = 1, exchange = 'server', mode = 'direct') {
-    if (!(this instanceof rmq)) {
-        return new rmq();
-    }
+class rmq extends EventEmitter {
+    constructor(type = 1, exchange = 'server', mode = 'direct') {
+        super();
 
-    /**
-     * 初始化
-     */
-    EventEmitter.call(this);
+        // 配置参数
+        this.config = {
+            // 类型
+            type: type,
+            // 消息订阅
+            describe: new Set()
+        };
 
-    // 配置参数
-    let config = {
-        // 类型
-        type: type,
-        // 消息订阅
-        describe: new Set()
-    };
+        // 生产者模式
+        if (type == 0) {
+            // exchange name
+            this.config.exchange = exchange;
+            // 数据分发模式
+            this.config.mode = mode;
+            // 路由关键字
+            this.config.routekey = new Map();
+        };
 
-    // 生产者模式
-    if (type == 0) {
-        // exchange name
-        config.exchange = exchange;
-        // 数据分发模式
-        config.mode = mode;
-        // 路由关键字
-        config.routekey = new Map();
-    };
-
-    // 基础配置
-    this.config = config;
-    // 连接标志
-    this.flag = false;
-    // 通道
-    this.channel = null;
-    // 定时器ID
-    this.timer = null;
-    // 客户端实例
-    this.client = null;
-
-    /**
-     * 重连mq服务器
-     */
-    const recon = async (time = 10000) => {
-        if (this.timer) {
-            return;
-        }
-
-        // 创建定时器
-        this.timer = setInterval(async () => {
-            try {
-                await this.connect(this.url);
-                // 连接失败，等待下次重连
-                if (!this.flag) {
-                    return;
-                }
-
-                // 连接成功，停止定时器
-                clearInterval(this.timer);
-                this.timer = null;
-
-                // 绑定路由关键字
-                if (type == 0) {
-                    for (let [queue, route] of this.config.routekey) {
-                        this.routeKey(queue, route);
-                    }
-                }
-
-                // 消息订阅
-                for (let item of this.config.describe) {
-                    this.consume(item);
-                }
-            } catch (e) {
-                debug('exception: ', e);
-            }
-
-        }, time);
+        // 连接标志
+        this.flag = false;
+        // 通道
+        this.channel = null;
+        // 定时器ID
+        this.timer = null;
+        // 客户端实例
+        this.client = null;
     }
 
     /**
      * 连接mq服务器
      * @param {String} 服务器连接地址
      */
-    rmq.prototype.connect = async (url) => {
+    async connect(url) {
         debug('connect to', url);
 
         this.url = url;
@@ -108,7 +62,7 @@ function rmq(type = 1, exchange = 'server', mode = 'direct') {
             debug('mq connect close');
 
             // 重连操作
-            recon();
+            recon.call(this);
         });
 
         this.client.on('error', (err) => {
@@ -118,7 +72,7 @@ function rmq(type = 1, exchange = 'server', mode = 'direct') {
         // 创建通道
         this.channel = await this.client.createChannel();
         // 生产者
-        if (type == 0) {
+        if (this.config.type == 0) {
             // 声明一个交换机
             await this.channel.assertExchange(this.config.exchange, this.config.mode, {confirm: false});
         }
@@ -129,7 +83,7 @@ function rmq(type = 1, exchange = 'server', mode = 'direct') {
     /**
      * 断开连接
      */
-    rmq.prototype.close = async () => {
+    async close() {
         // 收集所有队列
         let queue = this.type == 0? this.config.describe.add(...this.config.routekey.keys()) : this.config.describe;
         // 删除队列
@@ -148,7 +102,7 @@ function rmq(type = 1, exchange = 'server', mode = 'direct') {
      * 消息订阅
      * @param {String} 队列名称
      */
-    rmq.prototype.consume = async (queue) => {
+    async consume(queue) {
         // 声明队列
         await this.channel.assertQueue(queue, {autoDelete: true});
         // 消息订阅
@@ -168,7 +122,7 @@ function rmq(type = 1, exchange = 'server', mode = 'direct') {
      * 定义路由关键字
      * 生产者使用
      */
-    rmq.prototype.routeKey = async (queue, key) => {
+    async routeKey(queue, key) {
         // 记录路由字，用于重连
         this.config.routekey.set(queue, key);
         // 声明队列
@@ -182,17 +136,54 @@ function rmq(type = 1, exchange = 'server', mode = 'direct') {
      * @param {String} type   路由关键字
      * @param {String} expire 消息过期时间
      */
-    rmq.prototype.send = (data, type, expire = 120000) => {
+    async send(data, type, expire = 120000) {
         if (!this.flag) {
             debug('wait connect');
             return;
         }
 
-        debug(this.url, data, type);
+        debug(this.url, type, data);
         this.channel.publish(this.config.exchange, type, new Buffer(JSON.stringify(data)), {expiration: expire});
     }
 }
 
-util.inherits(rmq, EventEmitter);
+/**
+ * 重连mq服务器
+ */
+const recon = async (time = 10000) => {
+    if (this.timer) {
+        return;
+    }
+
+    // 创建定时器
+    this.timer = setInterval(async () => {
+        try {
+            await this.connect(this.url);
+            // 连接失败，等待下次重连
+            if (!this.flag) {
+                return;
+            }
+
+            // 连接成功，停止定时器
+            clearInterval(this.timer);
+            this.timer = null;
+
+            // 绑定路由关键字
+            if (type == 0) {
+                for (let [queue, route] of this.config.routekey) {
+                    this.routeKey(queue, route);
+                }
+            }
+
+            // 消息订阅
+            for (let item of this.config.describe) {
+                this.consume(item);
+            }
+        } catch (e) {
+            debug('exception: ', e);
+        }
+
+    }, time);
+}
 
 exports = module.exports = rmq;
