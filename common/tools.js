@@ -213,12 +213,12 @@ exports.isSameNetSeg = (addr1, addr2, mask) => {
     mask  = mask.split(".");
 
     // 格式错误
-    if (addr1.length() != addr2.length() != mask.length() != 4) {
+    if (addr1.length != addr2.length || addr1.length != mask.length || addr1.length != 4) {
         return false;
     }
 
     for(let i = 0; i < 4; ++i){
-        if (parseInt(addr1[i]) & parseInt(mask[i]) != parseInt(addr2[i]) & parseInt(mask[i])) {
+        if ((parseInt(addr1[i]) & parseInt(mask[i])) != (parseInt(addr2[i]) & parseInt(mask[i]))) {
             return false;
         }
     }
