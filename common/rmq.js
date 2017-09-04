@@ -107,14 +107,22 @@ class rmq extends EventEmitter {
         await this.channel.assertQueue(queue, {autoDelete: true});
         // 消息订阅
         await this.channel.consume(queue, (msg) => {
-            if (!msg) {
-                return;
-            }
+            try {
+                if (!msg) {
+                    return;
+                }
 
-            let content = new Buffer(msg.content).toString();
-            this.emit('msg', msg.fields.exchange, msg.fields.routingKey, content);
+                let content = new Buffer(msg.content).toString();
+                debug(msg.fields.exchange, msg.fields.routingKey, content);
+
+                this.emit('msg', msg.fields.exchange, msg.fields.routingKey, content);
+            } catch (e) {
+                debug(e);
+                this.emit('error', e);
+            }
         });
 
+        debug('consume', this.url, this.config.exchange, queue);
         this.config.describe.add(queue);
     }
 
@@ -150,13 +158,13 @@ class rmq extends EventEmitter {
 /**
  * 重连mq服务器
  */
-const recon = async (time = 10000) => {
+const recon = async function(time = 10000) {
     if (this.timer) {
         return;
     }
 
     // 创建定时器
-    this.timer = setInterval(async () => {
+    this.timer = setInterval(async function(){
         try {
             await this.connect(this.url);
             // 连接失败，等待下次重连
@@ -182,7 +190,6 @@ const recon = async (time = 10000) => {
         } catch (e) {
             debug('exception: ', e);
         }
-
     }, time);
 }
 
