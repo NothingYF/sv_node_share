@@ -153,6 +153,16 @@ class rmq extends EventEmitter {
         debug(this.url, type, data);
         this.channel.publish(this.config.exchange, type, new Buffer(JSON.stringify(data)), {expiration: expire});
     }
+
+    async sentToQueue(data, queue, expire = 120000) {
+        if (!this.flag) {
+            debug('wait connect');
+            return;
+        }
+
+        debug(this.url, queue, data);
+        this.channel.sendToQueue(queue, new Buffer(JSON.stringify(data)), {expiration: expire});
+    }
 }
 
 /**
