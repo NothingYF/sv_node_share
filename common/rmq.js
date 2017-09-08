@@ -154,7 +154,7 @@ class rmq extends EventEmitter {
         this.channel.publish(this.config.exchange, type, new Buffer(JSON.stringify(data)), {expiration: expire});
     }
 
-    async sentToQueue(data, queue, expire = 120000) {
+    async sendToQueue(data, queue, expire = 120000) {
         if (!this.flag) {
             debug('wait connect');
             return;
