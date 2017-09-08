@@ -2,6 +2,7 @@ const redis_client = require('./redis');
 const logger = require('./logger')('cache');
 const debug = require('debug')('cache');
 
+//全局redis
 var redis = null;
 
 /**
@@ -14,8 +15,10 @@ const init = async (host, port, db) => {
     try{
         redis = await redis_client.init(host, port, db);
         logger.info('redis ready');
+        return redis;
     }catch(err){
         logger.error('connect to redis error, check your redis config', err);
+        return null;
     }
 };
 
@@ -167,3 +170,6 @@ exports.set = set;
 
 // 设置缓存失效时间
 exports.expire = expire;
+
+// 获取原始对象（用于支持高级命令）
+exports.redis = ()=> redis;
