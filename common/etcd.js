@@ -9,7 +9,7 @@ const request = require('./request');
 var etcd_url = 'http://127.0.0.1:2379/v2/keys';
 
 /**
- * 获取键值
+ * 获取节点键值
  * @param key
  * @param json
  * @returns {*}
@@ -21,12 +21,60 @@ exports.get = async(key, recursive = true)=>{
     if(recursive)
         url += '?recursive=true';
 
+    debug(url);
+
     let ret = await request.call(url);
 
     if(ret)
         debug(ret.body);
 
     return ret.body;
+}
+
+/**
+ * 获取节点列表并转为JSON数组（非递归）
+ * @param key
+ * @param retkey 是否返回keys
+ * @returns {Promise.<void>}
+ */
+exports.mget = async(key, retkey = false)=>{
+
+    let url = etcd_url + key;
+
+    debug(url);
+
+    let ret = await request.call(url);
+
+    debug(ret.body);
+
+    if(!ret || !ret.body || !ret.body.node){
+        debug('empty');
+        return null;
+    }
+
+    let nodes = ret.body.node.nodes;
+    if(!nodes){
+        debug('nodes empty');
+        return null;
+    }
+
+    debug(nodes);
+
+    let keys = [];
+    let values = [];
+    for(let o of nodes){
+        if(retkey)
+            keys.push(o.key.substr(o.key.lastIndexOf('/')+1));
+        let jobj = JSON.parse(o.value);
+        if(jobj){
+            values.push(jobj);
+        }
+    }
+
+    if(retkey)
+        return [keys, values];
+    else
+        return values;
 }
 
 /**
