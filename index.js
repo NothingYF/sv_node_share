@@ -9,6 +9,8 @@ const tools = require('./common/tools');
 const validate = require('./common/validate');
 const etcd = require('./common/etcd');
 const rmq = require('./common/rmq');
+const config = require('./common/config');
+
 exports.cache = cache;
 exports.logger = logger;
 exports.request = request;
@@ -16,3 +18,4 @@ exports.tools = tools;
 exports.validate = validate;
 exports.etcd = etcd;
 exports.rmq = rmq;
+exports.config = config;
