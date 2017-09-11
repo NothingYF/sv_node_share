@@ -15,6 +15,7 @@ const yaml = require('js-yaml');
 const Etcd = require('./etcd');
 const logger = require('./logger')('config');
 
+const ETCD_DEFAULT = 'http://127.0.0.1:2379';
 var _config = null;
 
 const raw_load = (path, onload)=>{
@@ -60,7 +61,8 @@ const load = (path, etcd_keys = null, onload = null)=>{
         if(!etcd_keys)
             return _config;
 
-        var etcd = Etcd(_config.etcd || '');
+        let etcd_url = _config.etcd || ETCD_DEFAULT;
+        var etcd = Etcd(etcd_url);
 
         let key = `/config`;
         for(let o of etcd_keys){
@@ -73,7 +75,7 @@ const load = (path, etcd_keys = null, onload = null)=>{
             key += '/' + val;
         }
 
-        logger.info('upload config to remote: ', _config.etcd + key);
+        logger.info('upload config to remote: ', etcd_url + '/v2/keys' + key);
 
         etcd.set(key, content).then(()=>{
             logger.debug('upload ok');
