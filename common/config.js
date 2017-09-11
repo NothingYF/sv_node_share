@@ -17,7 +17,7 @@ const logger = require('./logger')('config');
 
 var _config = null;
 
-const rawLoad = (path)=>{
+const raw_load = (path, onload)=>{
 
     let content = fs.readFileSync(path, {encoding: 'utf8'});
     if(!content){
@@ -44,16 +44,18 @@ const rawLoad = (path)=>{
         logger.error('config load error');
     }
 
+    process.nextTick(onload.bind(this, _config));
+
     return content;
 }
 
-const load = (path, etcd_keys = null, onreload = null)=>{
+const load = (path, etcd_keys = null, onload = null)=>{
     try{
 
         if(_config)
             return _config;
 
-        let content = rawLoad(path);
+        let content = raw_load(path, onload);
 
         if(!etcd_keys)
             return _config;
@@ -83,11 +85,7 @@ const load = (path, etcd_keys = null, onreload = null)=>{
                     //配置已更新，修改本地配置并重新加载
                     fs.writeFile(path, o.node.value, (err)=>{
                         if(!err){
-                            process.nextTick(()=>{
-                                rawLoad(path);
-                                if(onreload)
-                                    onreload(_config);
-                            });
+                            process.nextTick(raw_load.bind(this, path, onload));
                         }else{
                             logger.error(err);
                         }
