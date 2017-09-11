@@ -21,6 +21,7 @@ servers:
   - cms
   - vms
   - ops
+  - ms
 
 clients:
   -
@@ -33,4 +34,4 @@ clients:
     name: 3
     enable: true
     
-debug: true
+debug: false

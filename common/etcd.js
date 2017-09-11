@@ -6,12 +6,26 @@ const debug = require('debug')('etcd');
 const tools = require('./tools');
 const Etcd = require('node-etcd');
 
+const ETCD_MATCH = /http:\/\/.+:\d+/i;
+var _global_url = 'http://127.0.0.1:2379';
+
 /**
  * ETCD Promise封装类
  */
 class etcd{
+
+    /**
+     * 构造函数
+     * @param url ETCD路径，
+     */
     constructor(url = null){
-        this._etcd = new Etcd(url);
+        let u = _global_url;
+        if(url){
+            let match = url.match(ETCD_MATCH);
+            if(match)
+                u = match[0];
+        }
+        this._etcd = new Etcd(u);
     }
 
     async get(key, recursive = true){
@@ -47,7 +61,7 @@ class etcd{
         }
 
         if(retkey)
-            return [keys, values];
+            return [values, keys];
         else
             return values;
     }
@@ -69,6 +83,10 @@ class etcd{
         });
     }
 
+    async put(key, value, ttl = null){
+        return this.set(key, value, ttl);
+    }
+
     async del(key){
         return new Promise((resolve, reject)=>{
             this._etcd.del(key, { recursive: true }, (err, body)=>{
@@ -88,7 +106,17 @@ class etcd{
     raw(){
         return this._etcd;
     }
+
+    /**
+     * 设置全局URL
+     * @param url
+     */
+    static set_url(url){
+        let match = url.match(ETCD_MATCH);
+        if(match)
+            _global_url = match[0];
+    }
 }
 
-
-exports = module.exports = etcd;
+exports = module.exports = (url)=> new etcd(url);
+exports.set_url = (url) => etcd.set_url(url);
