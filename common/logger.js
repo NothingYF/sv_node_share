@@ -3,47 +3,41 @@ const path = require('path');
 const log4js = require('log4js');
 
 fs.mkdir('logs', function(){});
-
-const LOG_LEVELS = { DEBUG : 0, INFO : 1, WARN : 2, ERROR : 3, OPERATOR : 4};
-exports.LOG_LEVELS = LOG_LEVELS;
-
-//全局日志级别（运行动态改变）
-var _loglevel = LOG_LEVELS.DEBUG;
-
 log4js.configure({
     appenders: [
         {type: 'console'},
-		{
+        {
             type: 'file',
             filename: path.join('logs', 'server.log'),
-			maxLogSize: 20<<20,
-			backUps: 30
+            maxLogSize: 20<<20,
+            backUps: 30
         }
     ]
 });
 
-function logger(category) {
+const LOG_LEVELS = { DEBUG : 0, INFO : 1, WARN : 2, ERROR : 3, OPERATOR : 4};
 
-    //实例化对象
-    if(!(this instanceof logger)){
-        return new logger(category);
+//全局日志级别（运行动态改变）
+var _loglevel = LOG_LEVELS.DEBUG;
+
+class logger{
+    constructor(category){
+        this.levels = LOG_LEVELS;
+        this._log = log4js.getLogger(category);
+        this._log.setLevel('DEBUG');
     }
-
-    this._log = log4js.getLogger(category);
-    this._log.setLevel('DEBUG');
-
     /**
      * 设置全局日志级别
      * @param level
      */
-    logger.prototype.setLevel = function (level) {
+    set_level(level) {
         _loglevel = level;
     }
 
     /**
      * debug输出
      */
-    logger.prototype.debug = function () {
+    debug() {
         if(_loglevel > LOG_LEVELS.DEBUG){
             return;
         }
@@ -54,7 +48,7 @@ function logger(category) {
     /**
      * info输出
      */
-    logger.prototype.info = function () {
+    info() {
         if(_loglevel > LOG_LEVELS.INFO){
             return;
         }
@@ -65,7 +59,7 @@ function logger(category) {
     /**
      * warn输出
      */
-    logger.prototype.warn = function () {
+    warn() {
         if(_loglevel > LOG_LEVELS.WARN){
             return;
         }
@@ -76,15 +70,19 @@ function logger(category) {
     /**
      * info输出
      */
-    logger.prototype.error = function () {
+    error() {
         if(_loglevel > LOG_LEVELS.ERROR){
             return;
         }
         this._log.warn.apply(this._log, arguments);
     }
 
-    return this;
+}
+
+function wrapper(category) {
+    return new logger(category);
 };
 
-module.exports = logger;
+module.exports = wrapper;
+
 
