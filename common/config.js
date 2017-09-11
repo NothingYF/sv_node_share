@@ -79,25 +79,25 @@ const load = (path, etcd_keys = null, onload = null)=>{
 
         etcd.set(key, content).then(()=>{
             logger.info('config upload ok');
-            let watcher = etcd.watcher(key);
-            //监听配置更新
-            watcher.on("set", (o)=> {
-                logger.info('remote config changed, save and reload local config');
-                if(o && o.node && o.node.value){
-                    //配置已更新，修改本地配置并重新加载
-                    fs.writeFile(path, o.node.value, (err)=>{
-                        if(!err){
-                            process.nextTick(raw_load.bind(this, path, onload));
-                        }else{
-                            logger.error(err);
-                        }
-                    });
-                }else{
-                    logger.error('error body');
+            etcd.watch(key, function onchange(err, o, next){
+                if(err){
+                    logger.error('config watch error:', err);
+                } else if(o.action == 'set'){
+                    logger.info('remote config changed, save and reload local config');
+                    if(o && o.node && o.node.value){
+                        //配置已更新，修改本地配置并重新加载
+                        fs.writeFile(path, o.node.value, (err)=>{
+                            if(!err){
+                                process.nextTick(raw_load.bind(this, path, onload));
+                            }else{
+                                logger.error(err);
+                            }
+                        });
+                    }else{
+                        logger.error('error body');
+                    }
                 }
-            });
-            watcher.on('error', (err)=>{
-               logger.error('config watcher error:', err);
+                next(onchange);
             });
         }).catch((err)=>{
             logger.warn('upload config failed, please check etcd config');

@@ -12,7 +12,7 @@ const logger = require('../index').logger('etcd');
 const etcd_example = async ()=>{
     try{
 
-        await etcd.set('/test/123', {a: 100, b: 200, c : [{c1: 'c1'}, {c2: 'c2'}]}, 20);
+        await etcd.set('/test/123', {a: 100, b: 200, c : [{c1: 'c1'}, {c2: 'c2'}]}, 5);
         await etcd.put('/test/1234', '#aaa\n\n123', 20);
 
 
@@ -22,14 +22,13 @@ const etcd_example = async ()=>{
         let v = await etcd.mget('/platform/server', true, true);
         logger.debug(v);
 
-        let watcher = etcd.watcher('/test/123');
-
-        const logout = logger.debug.bind(logger);
-        watcher.on("change", logout);
-        // watcher.on("expire", logout);
-        // watcher.on("set", logout);
-        // watcher.on("delete", logout);
-        // watcher.on("error", logout);
+        etcd.watch('/test/123', (err, result)=>{
+            if(err){
+                logger.error('watch error', err);
+            }else{
+                logger.debug('watch ok', result);
+            }
+        });
 
     }catch(err){
         logger.error(err);

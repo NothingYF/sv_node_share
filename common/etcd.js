@@ -4,10 +4,11 @@
 
 const debug = require('debug')('etcd');
 const tools = require('./tools');
-const Etcd = require('node-etcd');
+//const Etcd = require('node-etcd');
+const Etcd = require('etcdjs');
 
-const ETCD_MATCH = /http:\/\/.+:\d+/i;
-var _global_url = 'http://127.0.0.1:2379';
+const ETCD_MATCH = /http:\/\/(.+:\d+)/i;
+var _global_etcd = '127.0.0.1:2379';
 
 /**
  * ETCD Promise封装类
@@ -19,13 +20,13 @@ class etcd{
      * @param url ETCD路径，
      */
     constructor(url = null){
-        let u = _global_url;
+        let u = _global_etcd;
         if(url){
             let match = url.match(ETCD_MATCH);
             if(match)
-                u = match[0];
+                u = match[1];
         }
-        this._etcd = new Etcd(u);
+        this._etcd = Etcd(u);
     }
 
     async get(key, recursive = true){
@@ -99,8 +100,8 @@ class etcd{
         });
     }
 
-    watcher(key){
-        return this._etcd.watcher(key);
+    watch(key, cb){
+        return this._etcd.wait(key, cb);
     }
 
     raw(){
@@ -114,7 +115,7 @@ class etcd{
     static set_url(url){
         let match = url.match(ETCD_MATCH);
         if(match)
-            _global_url = match[0];
+            _global_etcd = match[1];
     }
 }
 
