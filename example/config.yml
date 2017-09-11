@@ -32,3 +32,5 @@ clients:
   -
     name: 3
     enable: true
+    
+debug: true
