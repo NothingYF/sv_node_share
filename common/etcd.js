@@ -56,7 +56,7 @@ class etcd{
         return new Promise((resolve, reject)=>{
             let val = value;
             if(tools.isJSON(val)){
-                val = JSON.stringify(value);
+                val = JSON.stringify(value, null, 2);
             }
 
             this._etcd.set(key, val, ttl ? {ttl: ttl} : null, (err, body)=>{

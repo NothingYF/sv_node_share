@@ -47,7 +47,7 @@ const rawLoad = (path)=>{
     return content;
 }
 
-const load = (path, etcd_keys = null)=>{
+const load = (path, etcd_keys = null, onreload = null)=>{
     try{
 
         if(_config)
@@ -83,7 +83,11 @@ const load = (path, etcd_keys = null)=>{
                     //配置已更新，修改本地配置并重新加载
                     fs.writeFile(path, o.node.value, (err)=>{
                         if(!err){
-                            process.nextTick(rawLoad.bind(this, path));
+                            process.nextTick(()=>{
+                                rawLoad(path);
+                                if(onreload)
+                                    onreload(_config);
+                            });
                         }else{
                             logger.error(err);
                         }

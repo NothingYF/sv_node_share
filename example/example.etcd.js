@@ -8,7 +8,7 @@ const etcd = new Etcd('http://192.168.1.173:8379');
 const etcd_example = async ()=>{
     try{
 
-        await etcd.set('/test/123', {hello: 100}, 10);
+        await etcd.set('/test/123', {a: 100, b: 200, c : [{c1: 'c1'}, {c2: 'c2'}]}, 10);
 
         let body = await etcd.get('/');
         logger.debug(body.node.nodes);
