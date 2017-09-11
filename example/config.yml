@@ -5,7 +5,7 @@
 # 主节点
 type: test
 sn: 12345678901234567890
-# etcd : http://192.168.1.173:8379
+etcd : http://192.168.1.173:8379
 
 # 子节点
 
@@ -34,4 +34,4 @@ clients:
     name: 3
     enable: true
     
-debug: false
+debug: true

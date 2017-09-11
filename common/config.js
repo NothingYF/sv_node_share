@@ -75,10 +75,10 @@ const load = (path, etcd_keys = null, onload = null)=>{
             key += '/' + val;
         }
 
-        logger.info('upload config to remote: ', etcd_url + '/v2/keys' + key);
+        logger.info('uploading config to remote: ', etcd_url + '/v2/keys' + key);
 
         etcd.set(key, content).then(()=>{
-            logger.debug('upload ok');
+            logger.info('config upload ok');
             let watcher = etcd.watcher(key);
             //监听配置更新
             watcher.on("set", (o)=> {
@@ -96,11 +96,12 @@ const load = (path, etcd_keys = null, onload = null)=>{
                     logger.error('error body');
                 }
             });
-            watcher.on('errpr', (err)=>{
+            watcher.on('error', (err)=>{
                logger.error('config watcher error:', err);
             });
         }).catch((err)=>{
-            logger.error(err);
+            logger.warn('upload config failed, please check etcd config');
+            //logger.error(err);
         });
 
     }catch(e){
