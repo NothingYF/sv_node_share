@@ -81,7 +81,7 @@ const load = (path, etcd_keys = null, onload = null)=>{
             logger.info('config upload ok');
             etcd.watch(key, function onchange(err, o, next){
                 if(err){
-                    logger.error('config watch error:', err);
+                    logger.error('config watch error:', err.message || err);
                 } else if(o.action == 'set'){
                     logger.info('remote config changed, save and reload local config');
                     if(o && o.node && o.node.value){
@@ -90,7 +90,7 @@ const load = (path, etcd_keys = null, onload = null)=>{
                             if(!err){
                                 process.nextTick(raw_load.bind(this, path, onload));
                             }else{
-                                logger.error(err);
+                                logger.error(err.message || err);
                             }
                         });
                     }else{

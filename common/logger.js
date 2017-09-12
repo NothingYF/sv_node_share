@@ -74,7 +74,7 @@ class logger{
         if(_loglevel > LOG_LEVELS.ERROR){
             return;
         }
-        this._log.warn.apply(this._log, arguments);
+        this._log.error.apply(this._log, arguments);
     }
 
 }
