@@ -96,7 +96,21 @@ class logger{
 
 }
 
-function wrapper(category) {
+function wrapper(category, workdir = null) {
+    if(workdir){
+        log4js.configure({
+            appenders: [
+                {type: 'console'},
+                {
+                    type: 'file',
+                    filename: path.join(workdir, 'logs', 'server.log'),
+                    maxLogSize: 20<<20,
+                    backUps: 30
+                }
+            ]
+        });
+    }
+
     return new logger(category);
 };
 
