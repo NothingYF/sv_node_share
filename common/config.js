@@ -80,9 +80,7 @@ const load = (path, etcd_keys = null, onload = null)=>{
         etcd.set(key, content).then(()=>{
             logger.info('config upload ok');
             etcd.watch(key, function onchange(err, o, next){
-                if(err){
-                    logger.error('config watch error:', err.message || err);
-                } else if(o.action == 'set'){
+                if(o && o.action == 'set'){
                     logger.info('remote config changed, save and reload local config');
                     if(o && o.node && o.node.value){
                         //配置已更新，修改本地配置并重新加载
@@ -97,6 +95,7 @@ const load = (path, etcd_keys = null, onload = null)=>{
                         logger.error('error body');
                     }
                 }
+
                 next(onchange);
             });
         }).catch((err)=>{
