@@ -61,7 +61,7 @@ const load = (path, etcd_keys = null, onload = null)=>{
         if(!etcd_keys)
             return _config;
 
-        let etcd_url = _config.etcd || ETCD_DEFAULT;
+        let etcd_url = _config.etcd;
         var etcd = Etcd(etcd_url);
 
         let key = `/config`;
@@ -75,7 +75,8 @@ const load = (path, etcd_keys = null, onload = null)=>{
             key += '/' + val;
         }
 
-        logger.info('uploading config to remote: ', etcd_url + '/v2/keys' + key);
+        logger.info('uploading config to remote: ',
+            (etcd_url == undefined ? ETCD_DEFAULT : etcd_url) + '/v2/keys' + key);
 
         etcd.set(key, content).then(()=>{
             logger.info('config upload ok');
