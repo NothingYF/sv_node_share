@@ -62,7 +62,9 @@ const load = (path, etcd_keys = null, onload = null)=>{
             return _config;
 
         let etcd_url = _config.etcd;
-        var etcd = Etcd(etcd_url);
+        if(etcd_url)
+            Etcd.set_url(etcd_url);
+        var etcd = Etcd();
 
         let key = `/config`;
         for(let o of etcd_keys){
