@@ -15,7 +15,7 @@ const etcd_example = async ()=>{
         await etcd.set('/test/123', {a: 100, b: 200, c : [{c1: 'c1'}, {c2: 'c2'}]}, 5);
         await etcd.put('/test/1234', '#aaa\n\n123', 20);
 
-        logger.debug(await etcd.getjson('/test/123'));
+        logger.debug(await etcd.getjson('/test/12345'));
 
 
         let body = await etcd.get('/');

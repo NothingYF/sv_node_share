@@ -47,8 +47,11 @@ class etcd{
                 if(err){
                     reject(err);
                 }else{
-                    let jval = JSON.parse(body.node.value);
-                    resolve(jval);
+                    if(body && body.node && body.node.value){
+                        resolve(JSON.parse(body.node.value));
+                    }else{
+                        resolve(null);
+                    }
                 }
             });
         });
