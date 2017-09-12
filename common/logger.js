@@ -77,6 +77,23 @@ class logger{
         this._log.error.apply(this._log, arguments);
     }
 
+    log(level, ...msg){
+        switch (level){
+            case LOG_LEVELS.DEBUG:
+                this.debug.apply(this, msg);
+                break;
+            case LOG_LEVELS.INFO:
+                this.info.apply(this, msg);
+                break;
+            case LOG_LEVELS.WARN:
+                this.warn.apply(this, msg);
+                break;
+            default:
+                this.error.apply(this, msg);
+                break;
+        }
+    }
+
 }
 
 function wrapper(category) {

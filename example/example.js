@@ -11,12 +11,14 @@ process.on('unhandledRejection', (reason, p) => {
 });
 
 logger.debug('a1', 1, 2);
-logger.setLevel(LOG_LEVELS.INFO);
+logger.set_level(LOG_LEVELS.INFO);
 logger.debug('a1 hide');
 
 logger2.debug('b1 debug', '3');
 
 logger2.info('b1 info', '4');
+
+logger.log(LOG_LEVELS.INFO, 'test log()', {result : 'ok'}, 1000);
 
 //require('./example.cache');
 //require('./example.etcd');
