@@ -143,6 +143,36 @@ exports.decrypt = function (str, secret) {
 };
 
 /**
+ * 加密
+ * @param algorithm 加密算法
+ * @param str       加密内容
+ * @param secret    密钥
+ * @param iv        偏移
+ */
+exports.encryptEx = function (algorithm, str, secret, iv = null) {
+    let vt = (iv && (algorithm != 'des-ecb'))? iv : 0;
+    let cipher = crypto.createCipheriv(algorithm, secret, new Buffer(vt));
+    let enc = cipher.update(str, 'utf8', 'hex');
+    enc += cipher.final('hex');
+    return enc;
+};
+
+/**
+ * 解密
+ * @param algorithm 解密算法
+ * @param str       解密内容
+ * @param secret    密钥
+ * @param iv        偏移
+ */
+exports.decryptEx = function (algorithm, str, secret, iv = null) {
+    let vt = (iv && (algorithm != 'des-ecb'))? iv : 0;
+    let decipher = crypto.createDecipheriv(algorithm, secret, new Buffer(vt));
+    let dec = decipher.update(str, 'hex', 'utf8');
+    dec += decipher.final('utf8');
+    return dec;
+};
+
+/**
  * MD5 Hash
  * @param str
  * @returns {*}
