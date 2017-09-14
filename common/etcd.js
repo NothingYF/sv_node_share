@@ -41,6 +41,22 @@ class etcd{
         });
     }
 
+    async getjson(key){
+        return new Promise((resolve, reject)=>{
+            this._etcd.get(key, { recursive: false }, (err, body)=>{
+                if(err){
+                    reject(err);
+                }else{
+                    if(body && body.node && body.node.value){
+                        resolve(JSON.parse(body.node.value));
+                    }else{
+                        resolve(null);
+                    }
+                }
+            });
+        });
+    }
+
     async mget(key, json = true, retkey = false){
         let ret = await this.get(key);
         debug(ret);
