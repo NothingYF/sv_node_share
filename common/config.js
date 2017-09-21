@@ -82,7 +82,8 @@ const load = (path, etcd_keys = null, onload = null)=>{
 
         etcd.set(key, content).then(()=>{
             logger.info('config upload ok');
-            etcd.watch(key, function onchange(err, o, next){
+            etcd.watch(key, function onchange(err, o){
+
                 if(o && o.action == 'set'){
                     logger.info('remote config changed, save and reload local config');
                     if(o && o.node && o.node.value){
@@ -99,7 +100,6 @@ const load = (path, etcd_keys = null, onload = null)=>{
                     }
                 }
 
-                next(onchange);
             });
         }).catch((err)=>{
             logger.warn('upload config failed, please check etcd config');
