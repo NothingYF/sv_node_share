@@ -25,16 +25,6 @@ class rmq extends EventEmitter {
             describe: new Set()
         };
 
-        // 生产者模式
-        if (type == 0) {
-            // exchange name
-            this.config.exchange = exchange;
-            // 数据分发模式
-            this.config.mode = mode;
-            // 路由关键字
-            this.config.routekey = new Map();
-        };
-
         // 连接标志
         this.flag = false;
         // 通道
@@ -43,6 +33,13 @@ class rmq extends EventEmitter {
         this.timer = null;
         // 客户端实例
         this.client = null;
+
+        // exchange name
+        this.config.exchange = exchange;
+        // 数据分发模式
+        this.config.mode = mode;
+        // 路由关键字
+        this.config.routekey = new Map();
     }
 
     /**
@@ -100,11 +97,9 @@ class rmq extends EventEmitter {
 
     /**
      * 消息订阅
-     * @param {String} 队列名称
+     * @param {String} queue 队列名称
      */
     async consume(queue) {
-        // 声明队列
-        await this.channel.assertQueue(queue, {autoDelete: true});
         // 消息订阅
         await this.channel.consume(queue, (msg) => {
             try {
@@ -139,21 +134,41 @@ class rmq extends EventEmitter {
     }
 
     /**
-     * 消息投递
+     * 声明队列
+     * @param {String} queue 队列名称
+     * @param {Boolean} binding 绑定交换机
+     * @param {String} route 路由字/模糊匹配
+     */
+    async assertQueue(queue, binding = false, route) {
+        await this.channel.assertQueue(queue, {autoDelete: true});
+
+        if (binding) {
+            await this.channel.bindQueue(queue, this.config.exchange, route);
+        }
+    }
+
+    /**
+     * 消息投递-通过路由字分发
      * @param {Object} data   消息内容
-     * @param {String} type   路由关键字
+     * @param {String} route   路由关键字
      * @param {String} expire 消息过期时间
      */
-    async send(data, type, expire = 120000) {
+    async send(data, route, expire = 120000) {
         if (!this.flag) {
             debug('wait connect');
             return;
         }
 
-        debug(this.url, type, data);
-        this.channel.publish(this.config.exchange, type, new Buffer(JSON.stringify(data)), {expiration: expire});
+        debug(this.url, route, data);
+        this.channel.publish(this.config.exchange, route, new Buffer(JSON.stringify(data)), {expiration: expire});
     }
 
+    /**
+     * 消息投递-直接投递到队列
+     * @param {Object} data   消息内容
+     * @param {String} queue  队列名称
+     * @param {String} expire 消息过期时间
+     */
     async sendToQueue(data, queue, expire = 120000) {
         if (!this.flag) {
             debug('wait connect');
