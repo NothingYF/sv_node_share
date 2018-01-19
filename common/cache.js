@@ -41,7 +41,7 @@ const get = (key) => {
             }
             data = JSON.parse(data);
             let duration = (new Date() - t);
-            logger.info('cache', 'get', key, duration + 'ms');
+            // logger.info('cache', 'get', key, duration + 'ms');
             resolve(data);
         });
     });
@@ -58,7 +58,7 @@ const set = (key, value, time = 86400) => {
     return new Promise(function (resolve, reject) {
         if(!redis)
             return reject(new Error('redis not connected'));
-        
+
         value = JSON.stringify(value);
         // 设置默认过期时间
 
@@ -92,7 +92,7 @@ const expire = (key, time) => {
     return new Promise(function (resolve, reject) {
         if(!redis)
             return reject(new Error('redis not connected'));
-        
+
         redis.expire(key, time, function (err) {
             if(err){
                 reject(err);
@@ -110,16 +110,15 @@ const expire = (key, time) => {
  */
 const del = (key) => {
     return new Promise(function (resolve, reject) {
-
         if(!redis)
             return reject(new Error('redis not connected'));
-        
+
         let t = new Date();
         redis.del(key, function (err, data) {
             if (err) {
                 return reject(err);
             }
-            
+
             let duration = (new Date() - t);
             logger.info('cache', 'del', key, duration + 'ms');
             resolve(data);
@@ -136,7 +135,7 @@ const keys = function(key) {
     return new Promise(function (resolve, reject) {
         if(!redis)
             return reject(new Error('redis not connected'));
-        
+
         let t = new Date();
         redis.keys(key, function (err, data) {
             if (err) {
@@ -145,13 +144,48 @@ const keys = function(key) {
             if (!data) {
                 return resolve();
             }
-            
+
             let duration = (new Date() - t);
             logger.info('cache', 'get', key, duration + 'ms');
             resolve(data);
         });
     });
 };
+
+/**
+ * 批量删除
+ * @param key 匹配关键字
+ * @returns {Promise}
+ */
+const delBatch = function(key) {
+    return new Promise(function (resolve, reject) {
+        let t = new Date();
+
+        keys(key)
+            .then((data, err) => {
+                // 查询失败
+                if (err) {
+                    return reject(err);
+                }
+
+                // 查询结果为空
+                if (!data.length) {
+                    return resolve();
+                }
+
+                return del(data)
+            }).then((data, err) => {
+            if (err) {
+                logger.error(err, 'redis->del');
+                return reject(err);
+            }
+
+            let duration = (new Date() - t);
+            logger.debug('cache', 'del', key, duration + 'ms');
+            resolve(data);
+        });
+    });
+}
 
 //初始化cache系统
 exports.init = init;
@@ -161,6 +195,8 @@ exports.keys = keys;
 
 // 删除key
 exports.del = del;
+// 批量删除
+exports.delBatch = delBatch;
 
 // 读取缓存数据
 exports.get = get;
