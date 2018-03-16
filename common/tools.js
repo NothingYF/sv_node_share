@@ -4,6 +4,7 @@
 const path = require('path');
 const moment = require('moment');
 const fse = require('fs-extra');
+const mzfs = require('mz/fs');
 const os = require('os');
 const crypto = require('crypto');
 const child_process = require('child_process');
@@ -46,12 +47,11 @@ const formatTime = (opt = {}) => {
     let time = opt.time || Date.now();
     // 格式化样式
     let exp = opt.exp || 'YYYY-MM-DD HH:mm:ss';
-    
+
     return moment(time).format(exp);
 }
 
 exports.formatTime = formatTime;
-
 
 /**
  * 复制文件及目录
@@ -255,3 +255,42 @@ exports.isSameNetSeg = (addr1, addr2, mask) => {
 
     return true;
 }
+
+/**
+ * 递归创建目录
+ */
+const mkdirs = async (dir) => {
+    let exists = await mzfs.exists(dir);
+    if (exists) {
+        return true;
+    } else {
+        let res = await mkdirs(path.dirname(dir));
+        if (res) {
+            await mzfs.mkdir(dir);
+            return true;
+        }
+    }
+}
+
+/**
+ * 参数替换
+ */
+const paramFormat = function () {
+    if (arguments.length == 0) {
+        return;
+    }
+
+    if (arguments.length == 1) {
+        return arguments[0];
+    }
+
+    let param = arguments[0];
+    for(let i = 1; i < arguments.length; i++) {
+        param = param.replace(new RegExp("\\{"+i+"\\}","g"), arguments[i]);
+    }
+
+    return param;
+}
+
+exports.mkdirs = mkdirs;
+exports.paramFormat = paramFormat;
