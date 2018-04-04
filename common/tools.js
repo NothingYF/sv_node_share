@@ -324,7 +324,7 @@ const FileBackUp = async (file, bkdir, bknum = 5) => {
                 let no = parseInt(item.substr(index + 1)) + 1;
 
                 // 超出备份数量
-                if (no > backup) {
+                if (no > bknum) {
                     await mzfs.unlink(path.join(bkDir, item));
                     continue;
                 }
