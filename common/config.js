@@ -11,14 +11,19 @@
  */
 
 const fs = require('fs');
+const path = require('path');
+const mzfs = require('mz/fs');
 const yaml = require('js-yaml');
 const Etcd = require('./etcd');
+const tools = require('./tools');
 const logger = require('./logger')('config');
 
 const ETCD_DEFAULT = 'http://127.0.0.1:2379';
 var _config = null;
+var _cfgPath = null;
 
 const raw_load = (path, onload)=>{
+    _cfgPath = path;
 
     let content = fs.readFileSync(path, {encoding: 'utf8'});
     if(!content){
@@ -52,7 +57,6 @@ const raw_load = (path, onload)=>{
 
 const load = (path, etcd_keys = null, onload = null)=>{
     try{
-
         if(_config)
             return _config;
 
@@ -113,4 +117,64 @@ const load = (path, etcd_keys = null, onload = null)=>{
     return _config;
 };
 
+/**
+ * 修改配置文件
+ * @param {String} cfgpath 配置文件路径
+ * @param {Array} data 修改内容
+ * * [{key: 'platform.local.name', value: '收费站'}]
+ * @param {Number} backup 备份数量
+ */
+const updateByPath = async (cfgpath, data, backup = 5) => {
+    let content = await mzfs.readFile(cfgpath, {encoding: 'utf8'});
+    let cfgarray = content.split('');
+
+    // 数据格式不正确
+    if (!data instanceof Array) {
+        logger.error('update config error:', data);
+        return;
+    }
+
+    // 数据遍历
+    for (let item of data) {
+        let node = null;
+        let start = 0, end = 0;
+        let keys = item.key.split('.');
+        // 查找结点位置
+        for (let key of keys) {
+            start = content.indexOf(key + ':', start);
+            // 未找到
+            if (start == -1) {
+                logger.error(`update config: ${item.key}->${key} not found`);
+                break;
+            }
+
+            // 记录最后一个key
+            node = key;
+        }
+
+        // 未找到
+        if (!node) {
+            continue;
+        }
+        // 查找结束位置（以\n换行符为结束）
+        end = content.indexOf('\n', start);
+
+        // 修改value
+        cfgarray.splice(start, end - start, ...`${node}: ${item.value}`.split(''));
+        content = cfgarray.join('');
+    }
+
+    // 备份配置文件，同级目录cfgbk
+    await tools.FileBackUp(cfgpath, 'cfgbk');
+
+    // 更新文件内容
+    await mzfs.writeFile(cfgpath, content);
+}
+
+const update = async (data, backup = 5) => {
+    return await updateByPath(_cfgPath, data, backup)
+}
+
 exports.load = load;
+exports.update = update;
+exports.updateByPath = updateByPath;

@@ -292,5 +292,52 @@ const paramFormat = function () {
     return param;
 }
 
+/**
+ * 文件备份
+ * @param {String} file 文件名（绝对路径）
+ * @param {String} bkdir 备份目录（同级目录下文件夹）
+ * @param {Number} bknum 备份文件数
+ */
+const FileBackUp = async (file, bkdir, bknum = 5) => {
+    // 备份配置文件，同级目录cfgbk
+    let pathObj = path.parse(file);
+    let bkDir = path.join(pathObj.dir, bkdir);
+    let exist = await mzfs.exists(bkDir);
+    if (!exist) {
+        await mzfs.mkdir(bkDir);
+    } else {
+        // 重名命已有文件
+        let tmpFiles = [];
+        let files = await mzfs.readdir(bkDir);
+        for (let item of files) {
+            tmpFiles.push('bk_' + item);
+            await mzfs.rename(path.join(bkDir, item), path.join(bkDir, 'bk_' + item));
+        }
+
+        for (let item of tmpFiles) {
+            // config.yml.0
+            let index = item.lastIndexOf('.');
+            if (item.substr(index) == pathObj.ext) {
+                await mzfs.rename(path.join(bkDir, item), path.join(bkDir, pathObj.base + '.' + 1));
+            } else {
+                // 计算文件序号
+                let no = parseInt(item.substr(index + 1)) + 1;
+
+                // 超出备份数量
+                if (no > backup) {
+                    await mzfs.unlink(path.join(bkDir, item));
+                    continue;
+                }
+
+                await mzfs.rename(path.join(bkDir, item), path.join(bkDir, pathObj.base + '.' + no));
+            }
+        }
+    }
+
+    // 备份当前文件
+    await mzfs.copyFile(file, path.join(bkDir, pathObj.base));
+}
+
 exports.mkdirs = mkdirs;
 exports.paramFormat = paramFormat;
+exports.FileBackUp = FileBackUp;
