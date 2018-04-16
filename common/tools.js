@@ -2,6 +2,7 @@
  * Created by Nothing on 2017/6/1.
  */
 const path = require('path');
+const iconv = require('iconv-lite');
 const moment = require('moment');
 const fse = require('fs-extra');
 const mzfs = require('mz/fs');

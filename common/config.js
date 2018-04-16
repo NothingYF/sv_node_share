@@ -136,36 +136,45 @@ const updateByPath = async (cfgpath, data, backup = 5) => {
 
     // 数据遍历
     for (let item of data) {
+        let index = 0;
         let node = null;
-        let start = 0, end = 0;
+        let target = null;
         let keys = item.key.split('.');
+
         // 查找结点位置
         for (let key of keys) {
-            start = content.indexOf(key + ':', start);
+            let reg = new RegExp(key + ':[^//][^#(\r)(\n)]*', 'g')
+            reg.lastIndex = index;
+
+            let res = reg.exec(content);
             // 未找到
-            if (start == -1) {
+            if (!res) {
                 logger.error(`update config: ${item.key}->${key} not found`);
                 break;
             }
 
             // 记录最后一个key
             node = key;
+
+            // 记录位置
+            index = res.index;
+            target = res[0];
         }
 
         // 未找到
         if (!node) {
             continue;
         }
-        // 查找结束位置（以\n换行符为结束）
-        end = content.indexOf('\n', start);
 
         // 修改value
-        cfgarray.splice(start, end - start, ...`${node}: ${item.value}`.split(''));
+        cfgarray.splice(index, target.length, ...`${node}: ${item.value + ' '}`.split(''));
         content = cfgarray.join('');
     }
 
     // 备份配置文件，同级目录cfgbk
-    await tools.FileBackUp(cfgpath, 'cfgbk');
+    if (backup) {
+        await tools.FileBackUp(cfgpath, 'cfgbk');
+    }
 
     // 更新文件内容
     await mzfs.writeFile(cfgpath, content);

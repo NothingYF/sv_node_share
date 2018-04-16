@@ -58,7 +58,7 @@ const set = (key, value, time = 86400) => {
     return new Promise(function (resolve, reject) {
         if(!redis)
             return reject(new Error('redis not connected'));
-        
+
         value = JSON.stringify(value);
         // 设置默认过期时间
 
@@ -92,7 +92,7 @@ const expire = (key, time) => {
     return new Promise(function (resolve, reject) {
         if(!redis)
             return reject(new Error('redis not connected'));
-        
+
         redis.expire(key, time, function (err) {
             if(err){
                 reject(err);
@@ -112,13 +112,13 @@ const del = (key) => {
     return new Promise(function (resolve, reject) {
         if(!redis)
             return reject(new Error('redis not connected'));
-        
+
         let t = new Date();
         redis.del(key, function (err, data) {
             if (err) {
                 return reject(err);
             }
-            
+
             let duration = (new Date() - t);
             logger.info('cache', 'del', key, duration + 'ms');
             resolve(data);
@@ -135,7 +135,7 @@ const keys = function(key) {
     return new Promise(function (resolve, reject) {
         if(!redis)
             return reject(new Error('redis not connected'));
-        
+
         let t = new Date();
         redis.keys(key, function (err, data) {
             if (err) {
@@ -144,7 +144,7 @@ const keys = function(key) {
             if (!data) {
                 return resolve();
             }
-            
+
             let duration = (new Date() - t);
             logger.info('cache', 'get', key, duration + 'ms');
             resolve(data);
@@ -155,9 +155,10 @@ const keys = function(key) {
 /**
  * 批量删除
  * @param key 匹配关键字
+ * @param exclue 排除关键字
  * @returns {Promise}
  */
-const delBatch = function(key) {
+const delBatch = function(key, exclude = null) {
     return new Promise(function (resolve, reject) {
         let t = new Date();
 
@@ -168,6 +169,28 @@ const delBatch = function(key) {
                     return reject(err);
                 }
 
+                // 排除指定项
+                if (exclude && exclude instanceof Array) {
+                    let tmp = [];
+                    for (let item of data) {
+                        let flag = true;
+                        // 判断是否保留当前项
+                        for (let ex of exclude) {
+                            if (item.startsWith(ex)) {
+                                flag = false;
+                                break;
+                            }
+                        }
+
+                        // 删除
+                        if (flag) {
+                            tmp.push(item);
+                        }
+                    }
+
+                    data = tmp;
+                }
+
                 // 查询结果为空
                 if (!data.length) {
                     return resolve();
@@ -175,15 +198,15 @@ const delBatch = function(key) {
 
                 return del(data)
             }).then((data, err) => {
-                if (err) {
-                    logger.error(err, 'redis->del');
-                    return reject(err);
-                }
+            if (err) {
+                logger.error(err, 'redis->del');
+                return reject(err);
+            }
 
-                let duration = (new Date() - t);
-                logger.debug('cache', 'del', key, duration + 'ms');
-                resolve(data);
-            });
+            let duration = (new Date() - t);
+            logger.debug('cache', 'del', key, duration + 'ms');
+            resolve(data);
+        });
     });
 }
 
