@@ -11,7 +11,7 @@ const etcd = require('./common/etcd');
 const rmq = require('./common/rmq');
 const config = require('./common/config');
 const system = require('./common/system');
-
+const upload = require('./common/upload');
 
 exports.cache = cache;
 exports.logger = logger;
@@ -22,3 +22,4 @@ exports.etcd = etcd;
 exports.rmq = rmq;
 exports.config = config;
 exports.system = system;
+exports.upload = upload;
