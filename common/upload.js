@@ -20,7 +20,7 @@ const parse = (req, uploadPath, limit = {}) => {
     limit.parts = limit.parts || "20";
 
     const busboy = new Busboy({
-        limits: limits,
+        limits: limit,
         headers: req.headers
     });
 
