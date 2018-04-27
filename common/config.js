@@ -55,9 +55,9 @@ const raw_load = (path, onload)=>{
     return content;
 }
 
-const load = (path, etcd_keys = null, onload = null)=>{
+const load = (path, etcd_keys = null, onload = null, reload = false)=>{
     try{
-        if(_config)
+        if(!reload && _config)
             return _config;
 
         let content = raw_load(path, onload);
