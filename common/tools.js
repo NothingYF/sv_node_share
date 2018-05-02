@@ -339,6 +339,26 @@ const FileBackUp = async (file, bkdir, bknum = 5) => {
     await mzfs.copyFile(file, path.join(bkDir, pathObj.base));
 }
 
+
+/**
+ * 字符串解析(server: "type=dws;sn=xxx")
+ * @param {String} data 解析内容
+ * @param {String} delimiter 分隔符
+ * @param {String} assignment 复制符
+ */
+exports.stringParser = (data, delimiter, assignment) => {
+    let value = data.split(delimiter);
+    let keyValue = new Map();
+
+    for (let item of value) {
+        let tmp = item.split(assignment);
+
+        keyValue.set(tmp[0], tmp[1]);
+    }
+
+    return keyValue;
+}
+
 exports.mkdirs = mkdirs;
 exports.paramFormat = paramFormat;
 exports.FileBackUp = FileBackUp;
