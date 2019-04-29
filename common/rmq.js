@@ -147,6 +147,10 @@ class rmq extends EventEmitter {
         }
     }
 
+    async bindQueue(queue, route) {
+        await this.channel.bindQueue(queue, this.config.exchange, route);
+    }
+
     /**
      * 消息投递-通过路由字分发
      * @param {Object} data   消息内容

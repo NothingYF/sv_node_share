@@ -1,13 +1,7 @@
-const config = require('../index').config;
-const logger = require('../index').logger('config');
+const request = require('../common/request');
+const fs = require('fs');
 
 
-var cfg = config.load(__dirname + '/config.yml', ['type', 'sn'], (data)=>{
-    logger.set_level(data.debug ? logger.levels.DEBUG : logger.levels.INFO);
-});
+(() => {
 
-
-setInterval(()=>{
-   logger.debug(cfg);
-   logger.info('info');
-}, 5000);
+})();

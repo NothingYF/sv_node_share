@@ -12,178 +12,27 @@ const child_process = require('child_process');
 
 moment.locale('zh-cn');
 
-/**
- * 判断是否为JSON对象
- * @param obj
- * @returns {boolean}
- */
-const isJSON = function (obj) {
-    var isjson = typeof(obj) == "object" &&
-        Object.prototype.toString.call(obj).toLowerCase() == "[object object]" && !obj.length;
-    return isjson;
-};
-
-exports.isJSON = isJSON;
-
-/**
- * 延时
- * @param time
- * @returns {Promise}
- */
-const sleep = function (time) {
-    return new Promise(function (resolve, reject) {
-        setTimeout(function () {
-            resolve();
-        }, time);
-    });
-};
-
-exports.sleep = sleep;
-
-/**
- * 格式化时间
- */
-const formatTime = (opt = {}) => {
-    // 格式化时间
-    let time = opt.time || Date.now();
-    // 格式化样式
-    let exp = opt.exp || 'YYYY-MM-DD HH:mm:ss';
-
-    return moment(time).format(exp);
-}
-
-exports.formatTime = formatTime;
-
-/**
- * 复制文件及目录
- * @param src
- * @param dst
- * @returns {Promise}
- */
-const copy = (src, dst) => {
-    return new Promise(function (resolve, reject) {
-        fse.copy(src, dst, {clobber : true}, function (err) {
-            if(err){
-                reject(err);
-            }else{
-                resolve();
-            }
-        });
-    });
-}
-
-exports.copy = copy;
-
-
-/**
- * 执行命令
- * @param cmd 命令参数
- * @returns {Promise}
- */
-exports.exec = function (cmd) {
-    return new Promise(function (resolve, reject) {
-
-        const bat = child_process.exec(cmd, {encoding : 'buffer'}, function (err, stdout, stderr) {
-            if(err){
-                return reject(err);
-            }
-            if(stdout || stderr){
-                if(os.platform == 'win32'){
-                    resolve(iconv.decode(stdout || stderr, 'GBK'));
-                }else{
-                    resolve((stdout||stderr).toString());
-                }
-            }
-        });
-
-    });
-}
-
-/**
- * 获取系统信息
- * @param cmd 命令参数
- * @returns {Promise}
- */
-exports.sysinfo = function () {
-    return {
-        CPU: os.cpus(),
-        OS: os.type() + ' ' + os.release(),
-        Memory:{
-            Total: Math.floor(os.totalmem() / (1024*1024)),
-            Free: Math.floor(os.freemem() / (1024*1024))
-        },
-        network: os.networkInterfaces(),
-        boottime: (moment().subtract(os.uptime()/60, 'm')).format('YYYY-MM-DD HH:mm:ss')
+Date.prototype.format = function(fmt) {
+    var o = {
+        "M+" : this.getMonth()+1,                 //月份
+        "d+" : this.getDate(),                    //日
+        "h+" : this.getHours(),                   //小时
+        "m+" : this.getMinutes(),                 //分
+        "s+" : this.getSeconds(),                 //秒
+        "q+" : Math.floor((this.getMonth()+3)/3), //季度
+        "S"  : this.getMilliseconds()             //毫秒
     };
+    if(/(y+)/.test(fmt)) {
+        fmt=fmt.replace(RegExp.$1, (this.getFullYear()+"").substr(4 - RegExp.$1.length));
+    }
+    for(var k in o) {
+        if(new RegExp("("+ k +")").test(fmt)){
+            fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));
+        }
+    }
+    return fmt;
 }
 
-/**
- * AES加密
- * @param str
- * @param secret
- * @returns {Query|Progress|*|{type, default}}
- */
-exports.encrypt = function (str, secret) {
-    var cipher = crypto.createCipher('aes192', secret);
-    var enc = cipher.update(str, 'utf8', 'hex');
-    enc += cipher.final('hex');
-    return enc;
-};
-
-/**
- * AES解密
- * @param str
- * @param secret
- * @returns {Query|Progress|*|{type, default}}
- */
-exports.decrypt = function (str, secret) {
-    var decipher = crypto.createDecipher('aes192', secret);
-    var dec = decipher.update(str, 'hex', 'utf8');
-    dec += decipher.final('utf8');
-    return dec;
-};
-
-/**
- * 加密
- * @param algorithm 加密算法
- * @param str       加密内容
- * @param secret    密钥
- * @param iv        偏移
- */
-exports.encryptEx = function (algorithm, str, secret, iv = null) {
-    let vt = (iv && (algorithm != 'des-ecb'))? iv : 0;
-    let cipher = crypto.createCipheriv(algorithm, secret, new Buffer(vt));
-    let enc = cipher.update(str, 'utf8', 'hex');
-    enc += cipher.final('hex');
-    return enc;
-};
-
-/**
- * 解密
- * @param algorithm 解密算法
- * @param str       解密内容
- * @param secret    密钥
- * @param iv        偏移
- */
-exports.decryptEx = function (algorithm, str, secret, iv = null) {
-    let vt = (iv && (algorithm != 'des-ecb'))? iv : 0;
-    let decipher = crypto.createDecipheriv(algorithm, secret, new Buffer(vt));
-    let dec = decipher.update(str, 'hex', 'utf8');
-    dec += decipher.final('utf8');
-    return dec;
-};
-
-/**
- * MD5 Hash
- * @param str
- * @returns {*}
- */
-exports.md5 = function (str) {
-    var md5sum = crypto.createHash('md5');
-    md5sum.update(str);
-    str = md5sum.digest('hex');
-    return str;
-};
 
 /**
  * 去除首尾指定字符
@@ -229,12 +78,176 @@ String.prototype.replaceAll = function (from, to) {
 }
 
 /**
+ * 判断是否为JSON对象
+ * @param obj
+ * @returns {boolean}
+ */
+const isJSON = function (obj) {
+    var isjson = typeof(obj) == "object" &&
+        Object.prototype.toString.call(obj).toLowerCase() == "[object object]" && !obj.length;
+    return isjson;
+};
+
+/**
+ * 延时
+ * @param time
+ * @returns {Promise}
+ */
+const sleep = function (time) {
+    return new Promise(function (resolve, reject) {
+        setTimeout(function () {
+            resolve();
+        }, time);
+    });
+};
+
+/**
+ * 格式化时间
+ */
+const formatTime = (opt = {}) => {
+    // 格式化时间
+    let time = opt.time || Date.now();
+    // 格式化样式
+    let exp = opt.exp || 'YYYY-MM-DD HH:mm:ss';
+
+    return moment(time).format(exp);
+}
+
+/**
+ * 复制文件及目录
+ * @param src
+ * @param dst
+ * @returns {Promise}
+ */
+const copy = (src, dst) => {
+    return new Promise(function (resolve, reject) {
+        fse.copy(src, dst, {clobber : true}, function (err) {
+            if(err){
+                reject(err);
+            }else{
+                resolve();
+            }
+        });
+    });
+}
+
+/**
+ * 执行命令
+ * @param cmd 命令参数
+ * @returns {Promise}
+ */
+const exec = function (cmd) {
+    return new Promise(function (resolve, reject) {
+
+        const bat = child_process.exec(cmd, {encoding : 'buffer'}, function (err, stdout, stderr) {
+            if(err){
+                return reject(err);
+            }
+            if(stdout || stderr){
+                if(os.platform == 'win32'){
+                    resolve(iconv.decode(stdout || stderr, 'GBK'));
+                }else{
+                    resolve((stdout||stderr).toString());
+                }
+            }
+        });
+
+    });
+}
+
+/**
+ * 获取系统信息
+ * @param cmd 命令参数
+ * @returns {Promise}
+ */
+const sysinfo = function () {
+    return {
+        CPU: os.cpus(),
+        OS: os.type() + ' ' + os.release(),
+        Memory:{
+            Total: Math.floor(os.totalmem() / (1024*1024)),
+            Free: Math.floor(os.freemem() / (1024*1024))
+        },
+        network: os.networkInterfaces(),
+        boottime: (moment().subtract(os.uptime()/60, 'm')).format('YYYY-MM-DD HH:mm:ss')
+    };
+}
+
+/**
+ * AES加密
+ * @param str
+ * @param secret
+ * @returns {Query|Progress|*|{type, default}}
+ */
+const encrypt = function (str, secret) {
+    var cipher = crypto.createCipher('aes192', secret);
+    var enc = cipher.update(str, 'utf8', 'hex');
+    enc += cipher.final('hex');
+    return enc;
+};
+
+/**
+ * AES解密
+ * @param str
+ * @param secret
+ * @returns {Query|Progress|*|{type, default}}
+ */
+const decrypt = function (str, secret) {
+    var decipher = crypto.createDecipher('aes192', secret);
+    var dec = decipher.update(str, 'hex', 'utf8');
+    dec += decipher.final('utf8');
+    return dec;
+};
+
+/**
+ * 加密
+ * @param algorithm 加密算法
+ * @param str       加密内容
+ * @param secret    密钥
+ * @param iv        偏移
+ */
+const encryptEx = function (algorithm, str, secret, iv = null) {
+    let vt = (iv && (algorithm != 'des-ecb'))? iv : 0;
+    let cipher = crypto.createCipheriv(algorithm, secret, new Buffer(vt));
+    let enc = cipher.update(str, 'utf8', 'hex');
+    enc += cipher.final('hex');
+    return enc;
+};
+
+/**
+ * 解密
+ * @param algorithm 解密算法
+ * @param str       解密内容
+ * @param secret    密钥
+ * @param iv        偏移
+ */
+const decryptEx = function (algorithm, str, secret, iv = null) {
+    let vt = (iv && (algorithm != 'des-ecb'))? iv : 0;
+    let decipher = crypto.createDecipheriv(algorithm, secret, new Buffer(vt));
+    let dec = decipher.update(str, 'hex', 'utf8');
+    dec += decipher.final('utf8');
+    return dec;
+};
+
+/**
+ * MD5 Hash
+ * @param str
+ * @returns {*}
+ */
+const md5 = function (str) {
+    var md5sum = crypto.createHash('md5');
+    md5sum.update(str);
+    str = md5sum.digest('hex');
+    return str;
+};
+
+/**
  * 判断两个IP地址是否在同一个网段
  * @param  {String}  addr1 地址一
  * @param  {String}  addr2 地址二
  * @param  {String}  mask  子网掩码
  */
-exports.isSameNetSeg = (addr1, addr2, mask) => {
+const isSameNetSeg = (addr1, addr2, mask) => {
     if(!addr1 || !addr2 || !mask){
         return false;
     }
@@ -339,14 +352,13 @@ const FileBackUp = async (file, bkdir, bknum = 5) => {
     await mzfs.copyFile(file, path.join(bkDir, pathObj.base));
 }
 
-
 /**
  * 字符串解析(server: "type=dws;sn=xxx")
  * @param {String} data 解析内容
  * @param {String} delimiter 分隔符
  * @param {String} assignment 复制符
  */
-exports.stringParser = (data, delimiter, assignment) => {
+const stringParser = (data, delimiter, assignment) => {
     let value = data.split(delimiter);
     let keyValue = new Map();
 
@@ -359,6 +371,118 @@ exports.stringParser = (data, delimiter, assignment) => {
     return keyValue;
 }
 
-exports.mkdirs = mkdirs;
-exports.paramFormat = paramFormat;
-exports.FileBackUp = FileBackUp;
+/**
+ * 取百分比
+ * numerator：分子
+ * denominator: 分母
+ */
+const percent = (numerator, denominator) => {
+    // 避免出现分母为0的情况
+    if (!denominator) {
+        denominator = 1;
+    }
+
+    // 小数点后保留两位
+    let value = numerator*100/denominator;
+    if (Number.isInteger(value)) {
+        return value;
+    } else {
+        return value.toFixed(2);
+    }
+}
+
+/**
+ * 取当前时间到零点时间差
+ */
+const ticks = () => {
+    // 24小时转ms
+    let dayMs = 86400000;
+    // 已经过ms
+    let go = new Date().getTime() - ZeroTime({ms: true});
+
+    return dayMs - go;
+}
+
+/**
+ * 取零点时间戳
+ */
+const ZeroTime = (opt = {}) => {
+    let time = opt.time || new Date();
+    let ms = opt.ms || false;
+
+    // 置零时分秒
+    time.setHours(0);
+    time.setMinutes(0);
+    time.setSeconds(0);
+    time.setMilliseconds(0);
+
+    return ms? time.getTime(): time.getTime()/1000;
+}
+
+/**
+ * ObjectId合法性校验
+ */
+const IsObjectId = (Id) => {
+    return ObjectId.isValid(Id);
+}
+
+/**
+ * 读取文件输出base64编码
+ */
+const FileBase64 = (file) => {
+    let data = fse.readFileSync(path.resolve(file));
+    return new Buffer(data).toString('base64');
+}
+
+/**
+ * 获取整点时间
+ */
+const OClockTIme = (time) => {
+    let hour = new Date(time).getHours();
+    return hour + ':00';
+}
+
+module.exports = {
+    // 判断是否为JSON对象
+    isJSON,
+    // 延时
+    sleep,
+    // 格式化时间
+    formatTime,
+    // 复制文件及目录
+    copy,
+    // 执行命令
+    exec,
+    // 获取系统信息
+    sysinfo,
+    // AES加密
+    encrypt,
+    // AES解密
+    decrypt,
+    encryptEx,
+    decryptEx,
+    // MD5 Hash
+    md5,
+    // 判断两个IP地址是否在同一个网段
+    isSameNetSeg,
+    // 递归创建目录
+    mkdirs,
+    // 参数替换
+    paramFormat,
+    // 文件备份
+    FileBackUp,
+    // 字符串解析(server: "type=dws;sn=xxx")
+    stringParser,
+    // 取百分比
+    percent,
+    // 取当前时间到零点时间差
+    ticks,
+    // 取零点时间戳
+    ZeroTime,
+    // ObjectId合法性校验
+    IsObjectId,
+    // 读取文件输出base64编码
+    FileBase64,
+    // 获取整点时间
+    OClockTIme
+};

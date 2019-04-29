@@ -1,13 +1,13 @@
 'use strict';
 
-//const Etcd = require('../index').etcd;
-const etcd = require('../index').etcd('http://192.168.1.173:8379');
+const Etcd = require('../index').etcd;
+// const etcd = require('../index').etcd('http://192.168.1.173:8379');
 
 const logger = require('../index').logger('etcd');
 
 //允许设置全局URL
-//Etcd.set_url('http://192.168.1.173:8379');
-//const etcd = new Etcd();
+Etcd.set_url('http://192.168.1.173:8379');
+const etcd = Etcd('http://192.168.1.173:8379');
 
 const etcd_example = async ()=>{
     try{
